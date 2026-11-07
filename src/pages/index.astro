@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+import NoteList from '../components/NoteList.astro';
+import ProjectList from '../components/ProjectList.astro';
+import Base from '../layouts/Base.astro';
+
+const projects = (await getCollection('projects', ({ data }) => data.featured)).sort(
+	(a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+const notes = (await getCollection('notes'))
+	.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+	.slice(0, 5);
+---
+
+<Base>
+	<section class="page-head">
+		<h1>Hi, I'm Brandon.</h1>
+		<p class="lede">
+			I'm a developer and student in Southern California. I build Discord bots, games, and small
+			tools, mostly in Python and JavaScript, and I'm studying data structures in C++ and x86
+			assembly.
+		</p>
+		<p>This site collects what I've built and short notes on what I've learned along the way.</p>
+	</section>
+
+	<section>
+		<div class="section-head">
+			<h2>Selected projects</h2>
+			<a href="/projects/">All projects →</a>
+		</div>
+		<ProjectList projects={projects} />
+	</section>
+
+	<section>
+		<div class="section-head">
+			<h2>Recently learned</h2>
+			<a href="/notes/">All notes →</a>
+		</div>
+		<NoteList notes={notes} />
+	</section>
+</Base>
+
+<style>
+	.section-head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		margin: 3.5rem 0 0.75rem;
+	}
+
+	.section-head h2 {
+		margin: 0;
+		color: var(--muted);
+		font-family: var(--mono);
+		font-size: 0.8125rem;
+		font-weight: 500;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.section-head a {
+		color: var(--muted);
+		font-size: 0.875rem;
+		text-decoration: none;
+	}
+
+	.section-head a:hover {
+		color: var(--accent);
+	}
+</style>

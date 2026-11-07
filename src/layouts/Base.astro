@@ -1,0 +1,104 @@
+---
+import '../styles/global.css';
+import { SITE } from '../site';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const { title, description = SITE.description } = Astro.props;
+const pageTitle = title ? `${title} · ${SITE.name}` : SITE.name;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const nav = [
+	{ href: '/projects/', label: 'Projects' },
+	{ href: '/notes/', label: 'Notes' },
+];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="color-scheme" content="light dark" />
+		<title>{pageTitle}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={description} />
+	</head>
+	<body>
+		<header class="site-header">
+			<a class="site-name" href="/">{SITE.name}</a>
+			<nav>
+				{
+					nav.map(({ href, label }) => (
+						<a href={href} aria-current={Astro.url.pathname.startsWith(href) ? 'page' : undefined}>
+							{label}
+						</a>
+					))
+				}
+			</nav>
+		</header>
+		<main>
+			<slot />
+		</main>
+		<footer class="site-footer">
+			<span>© {new Date().getFullYear()} {SITE.name}</span>
+			<a href={SITE.github}>GitHub</a>
+		</footer>
+	</body>
+</html>
+
+<style>
+	.site-header,
+	main,
+	.site-footer {
+		width: min(40rem, 100% - 2.5rem);
+		margin-inline: auto;
+	}
+
+	.site-header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.5rem 1.5rem;
+		padding-block: 2.5rem 3.5rem;
+	}
+
+	.site-name {
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	nav {
+		display: flex;
+		gap: 1.25rem;
+	}
+
+	nav a {
+		color: var(--muted);
+		text-decoration: none;
+	}
+
+	nav a:hover,
+	nav a[aria-current='page'] {
+		color: var(--fg);
+	}
+
+	.site-footer {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-top: 5rem;
+		padding-block: 1.5rem 2.5rem;
+		border-top: 1px solid var(--line);
+		color: var(--muted);
+		font-size: 0.875rem;
+	}
+</style>

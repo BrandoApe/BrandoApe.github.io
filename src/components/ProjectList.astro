@@ -1,0 +1,57 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+	projects: CollectionEntry<'projects'>[];
+}
+
+const { projects } = Astro.props;
+---
+
+<ul>
+	{
+		projects.map(({ id, data }) => (
+			<li>
+				<div class="title-row">
+					<a href={`/projects/${id}/`}>{data.title}</a>
+					<span class="meta">{data.date.getUTCFullYear()}</span>
+				</div>
+				<p>{data.description}</p>
+				{data.stack.length > 0 && <p class="meta">{data.stack.join(' · ')}</p>}
+			</li>
+		))
+	}
+</ul>
+
+<style>
+	ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	li {
+		padding-block: 1.25rem;
+		border-top: 1px solid var(--line);
+	}
+
+	.title-row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.title-row a {
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	p {
+		margin: 0.25rem 0 0;
+	}
+
+	p.meta {
+		margin-top: 0.5rem;
+	}
+</style>

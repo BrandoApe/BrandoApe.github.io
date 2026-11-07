@@ -1,0 +1,52 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+	notes: CollectionEntry<'notes'>[];
+}
+
+const { notes } = Astro.props;
+---
+
+<ul>
+	{
+		notes.map(({ id, data }) => {
+			const day = data.date.toISOString().slice(0, 10);
+			return (
+				<li>
+					<time class="meta" datetime={day}>
+						{day}
+					</time>
+					<a href={`/notes/${id}/`}>{data.title}</a>
+				</li>
+			);
+		})
+	}
+</ul>
+
+<style>
+	ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	li {
+		display: grid;
+		grid-template-columns: 7rem 1fr;
+		align-items: baseline;
+		gap: 0 1rem;
+		padding-block: 0.4rem;
+	}
+
+	a {
+		text-decoration: none;
+	}
+
+	@media (max-width: 30rem) {
+		li {
+			grid-template-columns: 1fr;
+			padding-block: 0.6rem;
+		}
+	}
+</style>

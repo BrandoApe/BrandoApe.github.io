@@ -1,0 +1,17 @@
+---
+import { getCollection } from 'astro:content';
+import ProjectList from '../../components/ProjectList.astro';
+import Base from '../../layouts/Base.astro';
+
+const projects = (await getCollection('projects')).sort(
+	(a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<Base title="Projects" description="Things Brandon Walter has built.">
+	<header class="page-head">
+		<h1>Projects</h1>
+		<p class="lede">Things I've built, newest first.</p>
+	</header>
+	<ProjectList projects={projects} />
+</Base>
