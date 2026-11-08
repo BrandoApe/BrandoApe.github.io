@@ -5,7 +5,7 @@ date: 2026-10-22
 tags: [python, performance]
 ---
 
-For [cosmic](/projects/cosmic/), I draw NumPy-simulated effects into a plain tkinter window. The first draft capped out near 70 fps. The bottleneck was not the simulation. It was handing each frame to Tk.
+For a small effects demo called cosmic, I draw NumPy-simulated effects into a plain tkinter window. The first draft capped out near 70 fps. The bottleneck was not the simulation. It was handing each frame to Tk.
 
 The first draft encoded every frame as a PNG for `tk.PhotoImage`. Even at `compress_level=1`, encoding the PNG and letting Tk decode it again cost about 10–12 ms per frame.
 

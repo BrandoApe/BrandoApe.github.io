@@ -17,7 +17,7 @@ A minimal personal site for projects and notes. The site uses [Astro](https://as
 
 ## Add a project
 
-Add a Markdown file to `src/content/projects/`. The file name sets the URL. For example, `cosmic.md` becomes `/projects/cosmic/`.
+Add a Markdown file to `src/content/projects/`. The file name sets the URL. For example, `pokepy.md` becomes `/projects/pokepy/`.
 
 ```md
 ---
