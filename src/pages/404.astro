@@ -1,10 +1,36 @@
 ---
+import Page from '../components/Page.astro';
 import Base from '../layouts/Base.astro';
+import { SITE } from '../site';
 ---
 
 <Base title="Not found">
-	<header class="page-head">
-		<h1>Page not found</h1>
-		<p class="lede">That page does not exist. <a href="/">Go to the home page</a>.</p>
-	</header>
+	<Page>
+		<Fragment slot="head">
+			<h1 class="display">Page not found</h1>
+			<p class="lede">That page does not exist. It may have moved, or the link may be wrong.</p>
+			<ul class="ways-out">
+				<li><a href="/">Home</a></li>
+				{
+					SITE.nav.map(({ href, label }) => (
+						<li>
+							<a href={href}>{label}</a>
+						</li>
+					))
+				}
+			</ul>
+		</Fragment>
+		<p class="label" slot="rail">Error 404</p>
+	</Page>
 </Base>
+
+<style>
+	.ways-out {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 1.5rem;
+		margin: 1.5rem 0 0;
+		padding: 0;
+		list-style: none;
+	}
+</style>

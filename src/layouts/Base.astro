@@ -1,5 +1,8 @@
 ---
+import { Font } from 'astro:assets';
 import '../styles/global.css';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
 import { SITE } from '../site';
 
 interface Props {
@@ -10,10 +13,6 @@ interface Props {
 const { title, description = SITE.description } = Astro.props;
 const pageTitle = title ? `${title} · ${SITE.name}` : SITE.name;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const nav = [
-	{ href: '/projects/', label: 'Projects' },
-	{ href: '/notes/', label: 'Notes' },
-];
 ---
 
 <!doctype html>
@@ -22,83 +21,133 @@ const nav = [
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="color-scheme" content="light dark" />
+		<meta name="theme-color" content="#fbfaf8" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#131312" media="(prefers-color-scheme: dark)" />
+		<script is:inline>
+			// The theme switch. This runs before the page paints, so a saved choice never flashes.
+			(() => {
+				const root = document.documentElement;
+				const system = matchMedia('(prefers-color-scheme: dark)');
+				const saved = () => {
+					try {
+						const theme = localStorage.getItem('theme');
+						return theme === 'light' || theme === 'dark' ? theme : null;
+					} catch {
+						return null;
+					}
+				};
+				const apply = (theme) => {
+					if (theme) root.dataset.theme = theme;
+					else delete root.dataset.theme;
+				};
+				apply(saved());
+
+				document.addEventListener('click', (event) => {
+					if (!event.target.closest?.('[data-theme-toggle]')) return;
+					const systemTheme = system.matches ? 'dark' : 'light';
+					const next = (root.dataset.theme ?? systemTheme) === 'dark' ? 'light' : 'dark';
+					// A switch back to the system's theme clears the choice. The site then follows the system again.
+					const choice = next === systemTheme ? null : next;
+					try {
+						if (choice) localStorage.setItem('theme', choice);
+						else localStorage.removeItem('theme');
+					} catch {}
+					apply(choice);
+				});
+
+				// Keep other tabs, and pages that return from the back/forward cache, on the same theme.
+				addEventListener('storage', (event) => event.key === 'theme' && apply(saved()));
+				addEventListener('pageshow', (event) => event.persisted && apply(saved()));
+			})();
+		</script>
+		<noscript>
+			<style is:inline>
+				[data-theme-toggle] {
+					display: none !important;
+				}
+			</style>
+		</noscript>
+		<style is:inline>
+			/* Two extras that the CSS minifier of the build breaks, so they stay out of the stylesheets.
+			   Browsers without these features skip them. */
+
+			/* The line under the header shows only after the page scrolls. */
+			@supports (animation-timeline: scroll()) {
+				.site-header {
+					animation: header-edge linear both;
+					animation-timeline: scroll();
+					animation-range: 0 3rem;
+				}
+			}
+
+			@keyframes header-edge {
+				to {
+					border-bottom-color: var(--line);
+				}
+			}
+
+			/* In "On this page", the link to the section on screen is marked. */
+			.toc ul {
+				scroll-target-group: auto;
+			}
+
+			.toc a:target-current {
+				color: var(--fg);
+			}
+		</style>
+		<Font cssVariable="--font-sans" preload={[{ style: 'normal' }]} />
+		<Font cssVariable="--font-mono" preload />
 		<title>{pageTitle}</title>
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonical} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content={SITE.name} />
 		<meta property="og:url" content={canonical} />
 		<meta property="og:title" content={pageTitle} />
 		<meta property="og:description" content={description} />
+		{/* The image that shows when someone shares a link. Its source is scripts/og.html. */}
+		<meta property="og:image" content={new URL('/og.png', Astro.site)} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content={SITE.description} />
+		<meta name="twitter:card" content="summary_large_image" />
 	</head>
 	<body>
-		<header class="site-header">
-			<a class="site-name" href="/">{SITE.name}</a>
-			<nav>
-				{
-					nav.map(({ href, label }) => (
-						<a href={href} aria-current={Astro.url.pathname.startsWith(href) ? 'page' : undefined}>
-							{label}
-						</a>
-					))
-				}
-			</nav>
-		</header>
-		<main>
-			<slot />
+		<a class="skip-link" href="#main">Skip to content</a>
+		<Header />
+		<main id="main">
+			<div class="container">
+				<slot />
+			</div>
 		</main>
-		<footer class="site-footer">
-			<span>© {new Date().getFullYear()} {SITE.name}</span>
-			<a href={SITE.github}>GitHub</a>
-		</footer>
+		<Footer />
 	</body>
 </html>
 
 <style>
-	.site-header,
-	main,
-	.site-footer {
-		width: min(40rem, 100% - 2.5rem);
-		margin-inline: auto;
-	}
-
-	.site-header {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: 0.5rem 1.5rem;
-		padding-block: 2.5rem 3.5rem;
-	}
-
-	.site-name {
-		font-weight: 600;
+	/* Hidden until the Tab key reaches it. */
+	.skip-link {
+		position: fixed;
+		top: 0.5rem;
+		left: 0.5rem;
+		z-index: 20;
+		padding: 0.5rem 0.875rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 6px;
+		background: var(--bg);
+		font-size: 0.9375rem;
 		text-decoration: none;
+		transform: translateY(-200%);
 	}
 
-	nav {
-		display: flex;
-		gap: 1.25rem;
+	.skip-link:focus-visible {
+		transform: none;
 	}
 
-	nav a {
-		color: var(--muted);
-		text-decoration: none;
-	}
-
-	nav a:hover,
-	nav a[aria-current='page'] {
-		color: var(--fg);
-	}
-
-	.site-footer {
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
-		margin-top: 5rem;
-		padding-block: 1.5rem 2.5rem;
-		border-top: 1px solid var(--line);
-		color: var(--muted);
-		font-size: 0.875rem;
+	@media print {
+		.skip-link {
+			display: none;
+		}
 	}
 </style>

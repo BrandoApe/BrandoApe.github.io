@@ -1,17 +1,18 @@
 ---
-import { getCollection } from 'astro:content';
+import Page from '../../components/Page.astro';
 import ProjectList from '../../components/ProjectList.astro';
+import { getProjects } from '../../entries';
 import Base from '../../layouts/Base.astro';
 
-const projects = (await getCollection('projects')).sort(
-	(a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
+const projects = await getProjects();
 ---
 
 <Base title="Projects" description="Things Brandon Walter has built.">
-	<header class="page-head">
-		<h1>Projects</h1>
-		<p class="lede">Things I've built, newest first.</p>
-	</header>
-	<ProjectList projects={projects} />
+	<Page>
+		<Fragment slot="head">
+			<h1 class="display">Projects</h1>
+			<p class="lede">Things I've built, newest first.</p>
+		</Fragment>
+		<ProjectList projects={projects} />
+	</Page>
 </Base>

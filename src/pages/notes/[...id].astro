@@ -1,34 +1,88 @@
 ---
-import { type CollectionEntry, getCollection, render } from 'astro:content';
+import { type CollectionEntry, render } from 'astro:content';
+import Icon from '../../components/Icon.astro';
+import Page from '../../components/Page.astro';
+import Pager from '../../components/Pager.astro';
+import Toc from '../../components/Toc.astro';
+import { getNotes, isoDate } from '../../entries';
 import Base from '../../layouts/Base.astro';
 
+type Note = CollectionEntry<'notes'>;
+
 export async function getStaticPaths() {
-	const notes = await getCollection('notes');
-	return notes.map((note) => ({
+	const notes = await getNotes();
+	return notes.map((note, i) => ({
 		params: { id: note.id },
-		props: note,
+		props: { note, newer: notes[i - 1], older: notes[i + 1] },
 	}));
 }
-type Props = CollectionEntry<'notes'>;
 
-const note = Astro.props;
+interface Props {
+	note: Note;
+	newer?: Note;
+	older?: Note;
+}
+
+const { note, newer, older } = Astro.props;
 const { title, description, date, tags } = note.data;
-const { Content } = await render(note);
+const { Content, headings } = await render(note);
+const link = (entry?: Note) => entry && { href: `/notes/${entry.id}/`, title: entry.data.title };
 ---
 
 <Base title={title} description={description}>
-	<article>
-		<header class="page-head">
-			<h1>{title}</h1>
-			<p class="meta inline-list">
-				<time datetime={date.toISOString().slice(0, 10)}>
-					{date.toLocaleDateString('en-US', { dateStyle: 'long', timeZone: 'UTC' })}
-				</time>
-				{tags.map((tag) => <a href={`/notes/tags/${tag}/`}>#{tag}</a>)}
+	<Page as="article" railLabel="Note details">
+		<Fragment slot="head">
+			<p class="crumb">
+				<a class="icon-link" href="/notes/">
+					<Icon name="arrow-left" />
+					Notes
+				</a>
 			</p>
-		</header>
+			<h1>{title}</h1>
+			{description && <p class="lede">{description}</p>}
+		</Fragment>
+
+		<Fragment slot="rail">
+			<dl class="rail-list">
+				<div class="rail-group">
+					<dt class="label">Published</dt>
+					<dd class="rail-items">
+						<time class="meta" datetime={isoDate(date)}>
+							{date.toLocaleDateString('en-US', { dateStyle: 'long', timeZone: 'UTC' })}
+						</time>
+					</dd>
+				</div>
+				{
+					tags.length > 0 && (
+						<div class="rail-group">
+							<dt class="label">Tags</dt>
+							<dd>
+								<ul class="rail-items">
+									{tags.map((tag) => (
+										<li>
+											<a class="meta" href={`/notes/tags/${tag}/`}>
+												#{tag}
+											</a>
+										</li>
+									))}
+								</ul>
+							</dd>
+						</div>
+					)
+				}
+			</dl>
+			<Toc headings={headings} />
+		</Fragment>
+
 		<div class="prose">
 			<Content />
 		</div>
-	</article>
+		<Pager
+			label="More notes"
+			prev={link(newer)}
+			prevLabel="Newer note"
+			next={link(older)}
+			nextLabel="Older note"
+		/>
+	</Page>
 </Base>

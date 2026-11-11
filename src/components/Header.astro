@@ -1,0 +1,170 @@
+---
+import { SITE } from '../site';
+import ThemeToggle from './ThemeToggle.astro';
+
+// The dev server can serve /notes without the last slash. The built site always has it.
+const path = Astro.url.pathname.replace(/\/?$/, '/');
+---
+
+<header class="site-header">
+	<div class="container bar">
+		<a class="wordmark" href="/" aria-current={path === '/' ? 'page' : undefined}>
+			{/* The same mark as public/favicon.svg: the "B" of IBM Plex Sans on a tile in the accent color. */}
+			<svg class="mark" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+				<rect width="16" height="16" rx="3.5"></rect>
+				<path
+					fill-rule="evenodd"
+					d="M4.43 12.8L4.43 3.2L8.87 3.2Q10.05 3.2 10.73 3.87Q11.41 4.55 11.41 5.66Q11.41 6.39 11.17 6.83Q10.92 7.27 10.53 7.48Q10.14 7.68 9.7 7.72L9.7 7.81Q10.01 7.81 10.37 7.93Q10.73 8.06 11.05 8.32Q11.37 8.58 11.57 9Q11.77 9.43 11.77 10.05Q11.77 10.82 11.45 11.44Q11.13 12.06 10.57 12.43Q10.01 12.8 9.3 12.8ZM6.24 8.69L6.24 11.26L8.77 11.26Q9.12 11.26 9.37 11.14Q9.61 11.01 9.74 10.78Q9.87 10.54 9.87 10.21L9.87 9.75Q9.87 9.4 9.74 9.17Q9.61 8.94 9.37 8.81Q9.12 8.69 8.77 8.69ZM6.24 4.74L6.24 7.2L8.49 7.2Q8.82 7.2 9.05 7.08Q9.28 6.95 9.41 6.73Q9.53 6.5 9.53 6.18L9.53 5.76Q9.53 5.44 9.41 5.21Q9.28 4.97 9.05 4.86Q8.82 4.74 8.49 4.74Z"
+				></path>
+			</svg>
+			<span class="name">{SITE.name}</span>
+		</a>
+		<nav aria-label="Main">
+			<ul>
+				{
+					SITE.nav.map(({ href, label }) => (
+						<li>
+							<a
+								href={href}
+								aria-current={path === href ? 'page' : path.startsWith(href) ? 'true' : undefined}
+							>
+								{label}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</nav>
+		<ThemeToggle />
+	</div>
+</header>
+
+<style>
+	.site-header {
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		border-bottom: 1px solid transparent;
+		/* A little see-through, with a blur, so text that scrolls under the header stays quiet. */
+		background: color-mix(in srgb, var(--bg) 82%, transparent);
+		-webkit-backdrop-filter: blur(12px);
+		backdrop-filter: blur(12px);
+	}
+
+	/* The line under the header shows after the page scrolls. That rule is in src/layouts/Base.astro. */
+
+	.bar {
+		display: flex;
+		align-items: center;
+		height: var(--header-h);
+	}
+
+	.wordmark {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.625rem;
+		min-width: 0;
+		margin-right: auto;
+		font-weight: 600;
+		letter-spacing: -0.01em;
+		text-decoration: none;
+		white-space: nowrap;
+	}
+
+	.wordmark:hover {
+		color: inherit;
+	}
+
+	/* On a screen too narrow for the whole header, the name shortens. The page never scrolls sideways. */
+	.name {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.mark {
+		flex: none;
+		width: 1.125rem;
+		height: 1.125rem;
+	}
+
+	.mark rect {
+		fill: var(--accent);
+	}
+
+	.mark path {
+		fill: var(--bg);
+	}
+
+	ul {
+		display: flex;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	nav a {
+		display: block;
+		position: relative;
+		padding: 0.5rem 0.75rem;
+		color: var(--muted);
+		font-size: 0.9375rem;
+		text-decoration: none;
+	}
+
+	nav a:hover,
+	nav a[aria-current] {
+		color: var(--fg);
+	}
+
+	nav a::after {
+		content: '';
+		position: absolute;
+		inset-inline: 0.75rem;
+		bottom: 0.25rem;
+		height: 2px;
+		border-radius: 1px;
+		transition: background-color 0.15s;
+	}
+
+	nav a:hover::after {
+		background: var(--line-strong);
+	}
+
+	/* The name lets the line slide from one item to the next when the page changes. */
+	nav a[aria-current]::after {
+		background: var(--accent);
+		view-transition-name: nav-indicator;
+	}
+
+	/* The button has padding around its icon. Pull it out so the icon meets the edge of the column. */
+	.bar :global(.theme-toggle) {
+		margin-right: -0.625rem;
+	}
+
+	/* Small phones: less padding, and no mark, so the name and the menu fit on one line. */
+	@media (max-width: 24rem) {
+		nav a {
+			padding-inline: 0.5rem;
+		}
+
+		nav a::after {
+			inset-inline: 0.5rem;
+		}
+	}
+
+	@media (max-width: 22rem) {
+		.mark {
+			display: none;
+		}
+	}
+
+	@media print {
+		.site-header {
+			position: static;
+		}
+
+		nav {
+			display: none;
+		}
+	}
+</style>

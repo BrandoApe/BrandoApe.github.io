@@ -4,6 +4,7 @@ description: A Python and pygame re-implementation of the Pokémon Red game engi
 date: 2026-10-24
 stack: [Python, pygame]
 featured: true
+# To do: add a "What I learned" section: what was hard, and what you would do differently.
 ---
 
 PokePy rebuilds the Game Boy engine of Pokémon Red in Python. The overworld, battle engine, menus, and save system are new Python code. The original story scripts run unchanged on a small interpreter for the Game Boy's SM83 CPU.
@@ -16,5 +17,3 @@ PokePy rebuilds the Game Boy engine of Pokémon Red in Python. The overworld, ba
 - Keyboard and gamepad controls can all be remapped.
 
 Pokémon is a trademark of Nintendo, Creatures Inc., and GAME FREAK inc. PokePy is an unofficial fan project for learning.
-
-<!-- Add a "What I learned" section: what was hard, and what you would do differently. -->

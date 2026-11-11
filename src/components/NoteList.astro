@@ -1,26 +1,34 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { isoDate } from '../entries';
 
 interface Props {
 	notes: CollectionEntry<'notes'>[];
+	/** The heading level of each title: 2 below a page title, 3 below a section label. */
+	level?: 2 | 3;
+	/** Show the description of each note below its title. */
+	detailed?: boolean;
 }
 
-const { notes } = Astro.props;
+const { notes, level = 2, detailed = false } = Astro.props;
+const Title = `h${level}` as const;
 ---
 
-<ul>
+<ul class:list={{ detailed }}>
 	{
-		notes.map(({ id, data }) => {
-			const day = data.date.toISOString().slice(0, 10);
-			return (
-				<li>
-					<time class="meta" datetime={day}>
-						{day}
-					</time>
-					<a href={`/notes/${id}/`}>{data.title}</a>
-				</li>
-			);
-		})
+		notes.map(({ id, data }) => (
+			<li>
+				<time class="meta" datetime={isoDate(data.date)}>
+					{isoDate(data.date)}
+				</time>
+				<div>
+					<Title class="title">
+						<a href={`/notes/${id}/`}>{data.title}</a>
+					</Title>
+					{detailed && data.description && <p>{data.description}</p>}
+				</div>
+			</li>
+		))
 	}
 </ul>
 
@@ -33,20 +41,67 @@ const { notes } = Astro.props;
 
 	li {
 		display: grid;
-		grid-template-columns: 7rem 1fr;
+		position: relative;
+		grid-template-columns: 6.5rem minmax(0, 1fr);
 		align-items: baseline;
-		gap: 0 1rem;
-		padding-block: 0.4rem;
+		column-gap: 1rem;
+		padding-block: 0.75rem;
+		border-top: 1px solid var(--line);
 	}
 
-	a {
+	.title {
+		margin: 0;
+		font-size: inherit;
+		font-weight: 400;
+		line-height: 1.45;
+		letter-spacing: 0;
+		text-wrap: pretty;
+	}
+
+	.title a {
 		text-decoration: none;
+	}
+
+	/* The link covers its whole row, so a click anywhere on the row opens the note. */
+	.title a::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+
+	li:hover .title a {
+		color: var(--accent);
+	}
+
+	.title a:focus-visible {
+		outline: none;
+	}
+
+	li:has(a:focus-visible) {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+		border-radius: 3px;
+	}
+
+	p {
+		margin: 0.25rem 0 0;
+	}
+
+	.detailed li {
+		padding-block: 1.25rem;
+	}
+
+	.detailed .title {
+		font-size: 1.125rem;
+		font-weight: 600;
+		line-height: 1.4;
+		letter-spacing: -0.01em;
 	}
 
 	@media (max-width: 30rem) {
 		li {
-			grid-template-columns: 1fr;
-			padding-block: 0.6rem;
+			grid-template-columns: minmax(0, 1fr);
+			row-gap: 0.125rem;
 		}
 	}
 </style>

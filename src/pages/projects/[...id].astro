@@ -1,38 +1,108 @@
 ---
-import { type CollectionEntry, getCollection, render } from 'astro:content';
+import { type CollectionEntry, render } from 'astro:content';
+import Icon from '../../components/Icon.astro';
+import Page from '../../components/Page.astro';
+import Pager from '../../components/Pager.astro';
+import Toc from '../../components/Toc.astro';
+import { getProjects } from '../../entries';
 import Base from '../../layouts/Base.astro';
 
+type Project = CollectionEntry<'projects'>;
+
 export async function getStaticPaths() {
-	const projects = await getCollection('projects');
-	return projects.map((project) => ({
+	const projects = await getProjects();
+	return projects.map((project, i) => ({
 		params: { id: project.id },
-		props: project,
+		props: { project, newer: projects[i - 1], older: projects[i + 1] },
 	}));
 }
-type Props = CollectionEntry<'projects'>;
 
-const project = Astro.props;
+interface Props {
+	project: Project;
+	newer?: Project;
+	older?: Project;
+}
+
+const { project, newer, older } = Astro.props;
 const { title, description, date, stack, repo, demo } = project.data;
-const { Content } = await render(project);
+const { Content, headings } = await render(project);
+const link = (entry?: Project) =>
+	entry && { href: `/projects/${entry.id}/`, title: entry.data.title };
 ---
 
 <Base title={title} description={description}>
-	<article>
-		<header class="page-head">
+	<Page as="article" railLabel="Project details">
+		<Fragment slot="head">
+			<p class="crumb">
+				<a class="icon-link" href="/projects/">
+					<Icon name="arrow-left" />
+					Projects
+				</a>
+			</p>
 			<h1>{title}</h1>
 			<p class="lede">{description}</p>
-			<p class="meta">{[date.getUTCFullYear(), ...stack].join(' · ')}</p>
-			{
-				(repo || demo) && (
-					<p class="inline-list">
-						{repo && <a href={repo}>Source ↗</a>}
-						{demo && <a href={demo}>Live site ↗</a>}
-					</p>
-				)
-			}
-		</header>
+		</Fragment>
+
+		<Fragment slot="rail">
+			<dl class="rail-list">
+				<div class="rail-group">
+					<dt class="label">Year</dt>
+					<dd class="rail-items"><span class="meta">{date.getUTCFullYear()}</span></dd>
+				</div>
+				{
+					stack.length > 0 && (
+						<div class="rail-group">
+							<dt class="label">Built with</dt>
+							<dd>
+								<ul class="rail-items">
+									{stack.map((tool) => (
+										<li class="meta">{tool}</li>
+									))}
+								</ul>
+							</dd>
+						</div>
+					)
+				}
+				{
+					(repo || demo) && (
+						<div class="rail-group">
+							<dt class="label">Links</dt>
+							<dd>
+								<ul class="rail-items">
+									{repo && (
+										<li>
+											<a class="icon-link" href={repo}>
+												Source
+												<Icon name="arrow-up-right" />
+											</a>
+										</li>
+									)}
+									{demo && (
+										<li>
+											<a class="icon-link" href={demo}>
+												Live site
+												<Icon name="arrow-up-right" />
+											</a>
+										</li>
+									)}
+								</ul>
+							</dd>
+						</div>
+					)
+				}
+			</dl>
+			<Toc headings={headings} />
+		</Fragment>
+
 		<div class="prose">
 			<Content />
 		</div>
-	</article>
+		<Pager
+			label="More projects"
+			prev={link(newer)}
+			prevLabel="Newer project"
+			next={link(older)}
+			nextLabel="Older project"
+		/>
+	</Page>
 </Base>

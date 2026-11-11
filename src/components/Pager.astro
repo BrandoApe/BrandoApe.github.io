@@ -1,0 +1,99 @@
+---
+/* Links to the entries before and after this one, at the end of a project or note. */
+import Icon from './Icon.astro';
+
+interface Entry {
+	href: string;
+	title: string;
+}
+
+interface Props {
+	/** What the entries are, for screen readers: "More notes". */
+	label: string;
+	prev?: Entry;
+	prevLabel: string;
+	next?: Entry;
+	nextLabel: string;
+}
+
+const { label, prev, prevLabel, next, nextLabel } = Astro.props;
+---
+
+{
+	(prev || next) && (
+		<nav class="pager" aria-label={label}>
+			{prev && (
+				<a class="prev" href={prev.href}>
+					<span class="label">
+						<Icon name="arrow-left" />
+						{prevLabel}
+					</span>
+					<span class="title">{prev.title}</span>
+				</a>
+			)}
+			{next && (
+				<a class="next" href={next.href}>
+					<span class="label">
+						{nextLabel}
+						<Icon name="arrow-right" />
+					</span>
+					<span class="title">{next.title}</span>
+				</a>
+			)}
+		</nav>
+	)
+}
+
+<style>
+	.pager {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1.5rem;
+		margin-top: 4rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--line);
+	}
+
+	a {
+		display: grid;
+		align-content: start;
+		gap: 0.375rem;
+		text-decoration: none;
+	}
+
+	.next {
+		grid-column: 2;
+		justify-items: end;
+		text-align: right;
+	}
+
+	.label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.title {
+		font-weight: 600;
+		line-height: 1.35;
+		text-wrap: balance;
+	}
+
+	.label :global(.icon) {
+		transition: transform 0.15s;
+	}
+
+	.next:hover :global(.icon) {
+		transform: translateX(2px);
+	}
+
+	.prev:hover :global(.icon) {
+		transform: translateX(-2px);
+	}
+
+	@media print {
+		.pager {
+			display: none;
+		}
+	}
+</style>

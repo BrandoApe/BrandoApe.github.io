@@ -1,0 +1,68 @@
+---
+/* One labeled section of the home page: the label in the rail, the content beside it. */
+import Icon from './Icon.astro';
+
+interface Props {
+	label: string;
+	/** A page with the full list, and the text of the link to it. */
+	href?: string;
+	linkLabel?: string;
+}
+
+const { label, href, linkLabel } = Astro.props;
+---
+
+<section class="band">
+	<div class="band-head">
+		<h2 class="label">{label}</h2>
+		{
+			href && (
+				<a class="more icon-link" href={href}>
+					{linkLabel}
+					<Icon name="arrow-right" />
+				</a>
+			)
+		}
+	</div>
+	<div class="band-body">
+		<slot />
+	</div>
+</section>
+
+<style>
+	.band {
+		margin-top: clamp(3rem, 8vw, 4.5rem);
+	}
+
+	.band-head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.more {
+		color: var(--muted);
+		font-size: 0.875rem;
+	}
+
+	@media (min-width: 60rem) {
+		.band {
+			display: grid;
+			grid-template-columns: var(--rail) minmax(0, 1fr);
+			/* The label sits on the baseline of the first line of the list. */
+			align-items: baseline;
+			column-gap: var(--gap);
+		}
+
+		.band-head {
+			display: block;
+			margin: 0;
+		}
+
+		.more {
+			margin-top: 0.5rem;
+		}
+	}
+</style>

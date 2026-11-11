@@ -1,71 +1,59 @@
 ---
-import { getCollection } from 'astro:content';
+import Band from '../components/Band.astro';
+import Icon from '../components/Icon.astro';
 import NoteList from '../components/NoteList.astro';
+import Page from '../components/Page.astro';
 import ProjectList from '../components/ProjectList.astro';
+import { getNotes, getProjects } from '../entries';
 import Base from '../layouts/Base.astro';
+import { SITE } from '../site';
 
-const projects = (await getCollection('projects', ({ data }) => data.featured)).sort(
-	(a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
-const notes = (await getCollection('notes'))
-	.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-	.slice(0, 5);
+const projects = (await getProjects()).filter(({ data }) => data.featured);
+const notes = (await getNotes()).slice(0, 5);
 ---
 
 <Base>
-	<section class="page-head">
-		<h1>Hi, I'm Brandon.</h1>
-		<p class="lede">
-			I'm a developer and student in Southern California. I build Discord bots, games, and small
-			tools, mostly in Python and JavaScript, and I'm studying data structures in C++ and x86
-			assembly.
-		</p>
-		<p>This site collects what I've built and short notes on what I've learned along the way.</p>
-	</section>
-
-	<section>
-		<div class="section-head">
-			<h2>Selected projects</h2>
-			<a href="/projects/">All projects →</a>
+	<Page railLabel="Elsewhere">
+		<Fragment slot="head">
+			<h1 class="display">Hi, I'm Brandon.</h1>
+			<p class="lede">
+				I'm a developer and student in Southern California. I build Discord bots, games, and small
+				tools, mostly in Python and JavaScript, and I'm studying data structures in C++ and x86
+				assembly.
+			</p>
+			<p class="about">
+				This site collects what I've built and short notes on what I've learned along the way.
+			</p>
+		</Fragment>
+		<div class="rail-group" slot="rail">
+			<h2 class="label">Elsewhere</h2>
+			<ul class="rail-items">
+				{
+					SITE.links.map(({ href, label }) => (
+						<li>
+							<a class="icon-link" href={href}>
+								{label}
+								<Icon name="arrow-up-right" />
+							</a>
+						</li>
+					))
+				}
+			</ul>
 		</div>
-		<ProjectList projects={projects} />
-	</section>
+	</Page>
 
-	<section>
-		<div class="section-head">
-			<h2>Recently learned</h2>
-			<a href="/notes/">All notes →</a>
-		</div>
-		<NoteList notes={notes} />
-	</section>
+	<Band label="Selected projects" href="/projects/" linkLabel="All projects">
+		<ProjectList projects={projects} level={3} />
+	</Band>
+
+	<Band label="Recently learned" href="/notes/" linkLabel="All notes">
+		<NoteList notes={notes} level={3} />
+	</Band>
 </Base>
 
 <style>
-	.section-head {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: 1rem;
-		margin: 3.5rem 0 0.75rem;
-	}
-
-	.section-head h2 {
-		margin: 0;
+	.about {
+		margin: 1rem 0 0;
 		color: var(--muted);
-		font-family: var(--mono);
-		font-size: 0.8125rem;
-		font-weight: 500;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-	}
-
-	.section-head a {
-		color: var(--muted);
-		font-size: 0.875rem;
-		text-decoration: none;
-	}
-
-	.section-head a:hover {
-		color: var(--accent);
 	}
 </style>

@@ -1,31 +1,36 @@
 ---
-import { type CollectionEntry, getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import NoteList from '../../../components/NoteList.astro';
+import Page from '../../../components/Page.astro';
+import TagMenu from '../../../components/TagMenu.astro';
+import { getNotes } from '../../../entries';
 import Base from '../../../layouts/Base.astro';
 
 export async function getStaticPaths() {
-	const notes = (await getCollection('notes')).sort(
-		(a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-	);
-	const tags = new Set(notes.flatMap((note) => note.data.tags));
-	return [...tags].map((tag) => ({
+	const notes = await getNotes();
+	const tags = [...new Set(notes.flatMap((note) => note.data.tags))].sort();
+	return tags.map((tag) => ({
 		params: { tag },
-		props: { tag, notes: notes.filter((note) => note.data.tags.includes(tag)) },
+		props: { tag, tags, notes: notes.filter((note) => note.data.tags.includes(tag)) },
 	}));
 }
 
 interface Props {
 	tag: string;
+	tags: string[];
 	notes: CollectionEntry<'notes'>[];
 }
 
-const { tag, notes } = Astro.props;
+const { tag, tags, notes } = Astro.props;
 ---
 
 <Base title={`#${tag}`} description={`Notes tagged ${tag}.`}>
-	<header class="page-head">
-		<h1>#{tag}</h1>
-		<p class="meta"><a href="/notes/">← All notes</a></p>
-	</header>
-	<NoteList notes={notes} />
+	<Page railLabel="Tags">
+		<Fragment slot="head">
+			<h1 class="display">#{tag}</h1>
+			<p class="lede">Notes with the tag {tag}, newest first.</p>
+		</Fragment>
+		<TagMenu slot="rail" tags={tags} current={tag} />
+		<NoteList notes={notes} detailed />
+	</Page>
 </Base>

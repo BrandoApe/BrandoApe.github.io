@@ -1,0 +1,84 @@
+---
+/*
+ * The grid of every page: a heading, a rail of details beside it, and the content.
+ * On a narrow screen the three parts stack in that order.
+ */
+interface Props {
+	/** The element to use as the wrapper. Use "article" for one project or one note. */
+	as?: 'div' | 'article';
+	/** A name for the rail, for screen readers. */
+	railLabel?: string;
+}
+
+const { as: Wrapper = 'div', railLabel } = Astro.props;
+const hasRail = Astro.slots.has('rail');
+const hasBody = Astro.slots.has('default');
+---
+
+<Wrapper class:list={['page', { 'has-body': hasBody }]}>
+	<header class="page-head">
+		<slot name="head" />
+	</header>
+	{
+		hasRail && (
+			<aside class="page-rail" aria-label={railLabel}>
+				<slot name="rail" />
+			</aside>
+		)
+	}
+	{
+		hasBody && (
+			<div class="page-body">
+				<slot />
+			</div>
+		)
+	}
+</Wrapper>
+
+<style>
+	.page {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: 1.75rem;
+	}
+
+	.page-body {
+		margin-top: 0.75rem;
+	}
+
+	@media (min-width: 60rem) {
+		.page {
+			grid-template-columns: var(--rail) minmax(0, 1fr);
+			/* The first label in the rail sits on the baseline of the first line of the heading. */
+			align-items: baseline;
+			column-gap: var(--gap);
+			row-gap: 3rem;
+		}
+
+		.page-head,
+		.page-body {
+			grid-column: 2;
+		}
+
+		.page-body {
+			margin-top: 0;
+		}
+
+		.page-rail {
+			position: sticky;
+			top: calc(var(--header-h) + 2rem);
+			grid-row: 1;
+			grid-column: 1;
+		}
+
+		.has-body .page-rail {
+			grid-row: 1 / span 2;
+		}
+	}
+
+	@media print {
+		.page-rail {
+			position: static;
+		}
+	}
+</style>

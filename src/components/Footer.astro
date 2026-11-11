@@ -1,0 +1,51 @@
+---
+import { SITE } from '../site';
+import Icon from './Icon.astro';
+---
+
+<footer class="site-footer">
+	<div class="container bar">
+		<p>© {new Date().getFullYear()} {SITE.name}</p>
+		<ul>
+			{
+				SITE.links.map(({ href, label }) => (
+					<li>
+						<a class="icon-link" href={href}>
+							{label}
+							<Icon name="arrow-up-right" />
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</footer>
+
+<style>
+	.site-footer {
+		margin-top: clamp(4rem, 10vw, 6rem);
+		color: var(--muted);
+		font-size: 0.875rem;
+	}
+
+	.bar {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 0.5rem 1.5rem;
+		padding-block: 1.5rem 2.5rem;
+		border-top: 1px solid var(--line);
+	}
+
+	p {
+		margin: 0;
+	}
+
+	ul {
+		display: flex;
+		gap: 1.25rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+</style>

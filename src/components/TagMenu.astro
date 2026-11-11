@@ -1,0 +1,46 @@
+---
+/* The tags of all notes, as a menu. It goes in the rail of the notes list and of each tag page. */
+interface Props {
+	tags: string[];
+	/** The tag of the page that shows the menu. Leave it out on the list of all notes. */
+	current?: string;
+}
+
+const { tags, current } = Astro.props;
+---
+
+<nav class="rail-group" aria-labelledby="tag-menu-label">
+	<h2 class="label" id="tag-menu-label">Tags</h2>
+	<ul class="rail-items">
+		<li>
+			<a class="meta" href="/notes/" aria-current={current ? undefined : 'page'}>All notes</a>
+		</li>
+		{
+			tags.map((tag) => (
+				<li>
+					<a
+						class="meta"
+						href={`/notes/tags/${tag}/`}
+						aria-current={tag === current ? 'page' : undefined}
+					>
+						#{tag}
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</nav>
+
+<style>
+	a:hover {
+		color: var(--fg);
+	}
+
+	a[aria-current] {
+		color: var(--fg);
+		text-decoration: underline;
+		text-decoration-color: var(--accent);
+		text-decoration-thickness: 2px;
+		text-underline-offset: 0.4em;
+	}
+</style>

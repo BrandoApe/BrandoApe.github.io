@@ -1,0 +1,58 @@
+---
+/* "On this page": links to the sections of a project or note. It shows only on a wide screen. */
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+	headings: MarkdownHeading[];
+}
+
+const sections = Astro.props.headings.filter(({ depth }) => depth === 2);
+---
+
+{
+	sections.length > 1 && (
+		<nav class="rail-group toc" aria-labelledby="toc-label">
+			<h2 class="label" id="toc-label">
+				On this page
+			</h2>
+			<ul class="rail-items">
+				{sections.map(({ slug, text }) => (
+					<li>
+						<a href={`#${slug}`}>{text}</a>
+					</li>
+				))}
+			</ul>
+		</nav>
+	)
+}
+
+<style>
+	.toc {
+		display: none;
+	}
+
+	@media (min-width: 60rem) {
+		.toc {
+			display: block;
+		}
+	}
+
+	ul {
+		font-size: 0.875rem;
+	}
+
+	/* The link to the section on screen is marked too. That rule is in src/layouts/Base.astro. */
+	a {
+		color: var(--muted);
+	}
+
+	a:hover {
+		color: var(--fg);
+	}
+
+	@media print {
+		.toc {
+			display: none;
+		}
+	}
+</style>
